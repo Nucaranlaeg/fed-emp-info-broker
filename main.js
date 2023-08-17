@@ -24,6 +24,8 @@ function loadAllGames(games){
 		node.querySelector(".name").innerHTML = game.name;
 		node.querySelector(".opponent").innerHTML = game.opponent;
 		node.onclick = () => {
+			document.querySelectorAll(".game").forEach(gameNode => gameNode.classList.remove("selected"));
+			node.classList.add("selected");
 			loadGame(game);
 		};
 		gamesNode.appendChild(node);
@@ -75,11 +77,8 @@ function sendMessage(){
 		subject: document.querySelector("#new-subject").value,
 		to: currentGame.opponent,
 		data: document.querySelector("#new-data").value,
+		game: currentGame,
 	}
-	throw "NOT IMPLEMENTED";
-}
-
-function postMessage(data){
 	const xml = new XMLHttpRequest();
 	xml.onreadystatechange = () => {
 		getMessages();

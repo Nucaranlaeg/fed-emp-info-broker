@@ -41,6 +41,10 @@ textarea {
 	cursor: pointer;
 }
 
+.selected {
+	background-color: #115544;
+}
+
 .pending {
 	background-color: #112233;
 	width: 400px;
