@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<meta charset="UTF-8" />
+<head>
+	<title>Federation and Empire Information Broker</title>
+	<link rel="stylesheet" type="text/css" href="style.css" />
+	<script type="text/javascript" defer src="main.js"></script>
+</head>
+
+<body>
+	<div id="templates">
+		<div id="pending-in" class="message">
+			<div class="name"></div>
+			<div class="data"></div>
+			<div class="response">
+				<textarea></textarea>
+			</div>
+			<button>Send</button>
+		</div>
+		<div id="pending-out" class="message">
+			<div class="name"></div>
+			<div class="data">
+				<textarea></textarea>
+			</div>
+			<button>Update</button>
+		</div>
+		<div id="game" class="game">
+			<div class="name"></div>
+			<div class="opponent"></div>
+		</div>
+	</div>
+	<div id="auth">
+		<form>
+			<div>
+				<label for="email">Email:</label>
+				<input id="email" type="email" />
+			</div>
+			<div>
+				<label for="password">Password:</label>
+				<input id="password" type="password" />
+			</div>
+			<button type="submit">Log in</button>
+		</form>
+	</div>
+	<div id="games">
+
+	</div>
+	<div class="pending">
+		<h2>Incoming</h2>
+		<div id="pending-incoming"></div>
+	</div>
+	<div class="pending">
+		<h2>Outgoing</h2>
+		<div id="pending-outgoing"></div>
+	</div>
+	<div id="new-message" class="message">
+		<div class="name">
+			<span class="title">Subject:</span>
+			<input type="text" id="new-subject">
+		</div>
+		<div class="data">
+			<textarea id="new-data"></textarea>
+		</div>
+		<button onclick="sendMessage()">Send</button>
+	</div>
+</body>
