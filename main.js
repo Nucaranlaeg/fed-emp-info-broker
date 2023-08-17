@@ -86,6 +86,7 @@ function postMessage(data){
 	};
 	xml.open("POST", url, true);
 	data.type = "send message";
+	data.game = currentGame;
 	xml.send(data);
 }
 
