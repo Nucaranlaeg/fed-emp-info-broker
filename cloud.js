@@ -49,7 +49,8 @@ function rollDice(msg){
 }
 
 function sendEmail(addresses, contents){
-	
+	console.log("addresses:", addresses);
+	console.log("contents:", contents);
 }
 
 exports.run = async (req, res) => {
@@ -64,15 +65,15 @@ exports.run = async (req, res) => {
 	// Do auth
 	let logged_in = false;
 	if (body.token){
-		const token = runQuery(`SELECT CASE WHEN last_login > DATETIME_SUB(CURRENT_DATETIME(), INTERVAL 1 WEEK) THEN token ELSE "" END FROM tables.players WHERE "${body.player}" == email`);
+		const token = runQuery(`SELECT CASE WHEN last_login > DATETIME_SUB(CURRENT_DATETIME(), INTERVAL 1 WEEK) THEN token ELSE "" END FROM tables.players WHERE "${body.player}" = email`);
 		if (token === body.token) logged_in = true;
 	}
-	if (!logged_in && body.type !== "email confirmation"){
-		const hash = cyrb53(body.password);
-		const db_hash = runQuery(`SELECT password_hash FROM tables.players WHERE "${body.player}" == email`);
+	if (!logged_in && !["email confirmation", "new user"].includes(body.type)){
+		const hash = cyrb53(body.password).toString();
+		const db_hash = runQuery(`SELECT password_hash FROM tables.players WHERE "${body.player}" = email`);
 		if (hash !== db_hash) throw "Invalid password";
 	}
-	runQuery(`UPDATE tables.players SET last_login = CURRENT_DATETIME() WHERE "${body.player}" == email`);
+	runQuery(`UPDATE tables.players SET last_login = CURRENT_DATETIME() WHERE "${body.player}" = email`);
 	// Just in case we need it
 	const newToken = Math.random().toString();
 	// Get values
@@ -90,11 +91,11 @@ exports.run = async (req, res) => {
 			res.send();
 			break;
 		case "update message":
-			runQuery(`UPDATE tables.messages SET data = ${body.data} WHERE id = ${body.id} AND response IS NULL`);
+			runQuery(`UPDATE tables.messages SET data = "${body.data}" WHERE id = ${body.id} AND response IS NULL`);
 			res.send();
 			break;
 		case "reply message":
-			runQuery(`UPDATE tables.messages SET response = ${body.response} WHERE id = ${body.id} AND response IS NULL`);
+			runQuery(`UPDATE tables.messages SET response = "${body.response}" WHERE id = ${body.id} AND response IS NULL`);
 			const [players, msg] = runQuery(`SELECT players, data FROM tables.games WHERE id = ${body.game.id}`);
 			const other_player = players.find(p => p !== body.to);
 			const updated_msg = rollDice(msg);
@@ -107,7 +108,7 @@ ${updated_response}`);
 			res.send();
 			break;
 		case "new game":
-			runQuery(`INSERT INTO tables.games (id, players) VALUES (SELECT MAX(id) + 1 FROM tables.games, [${body.player}, ${body.opponent}])`);
+			runQuery(`INSERT INTO tables.games (id, players) VALUES (SELECT MAX(id) + 1 FROM tables.games, ["${body.player}", "${body.opponent}"])`);
 			res.send();
 			break;
 		case "login":
@@ -115,14 +116,14 @@ ${updated_response}`);
 			res.send(newToken);
 			break;
 		case "new user":
-			runQuery(`INSERT INTO tables.players (email, is_confirmed, last_login, password_hash) VALUES (${body.player}, FALSE, CURRENT_DATETIME(), ${newToken})`);
-			sendEmail([body.player], `Please copy this number into the appropriate space on the site (along with a new password) to confirm your email address: ${token}`);
+			runQuery(`INSERT INTO tables.players (email, is_confirmed, last_login, password_hash) VALUES ("${body.player}", FALSE, CURRENT_DATETIME(), "${newToken}")`);
+			sendEmail([body.player], `Please copy this number into the appropriate space on the site (along with a new password) to confirm your email address: ${newToken}`);
 			break;
 		case "email confirmation":
-			const db_hash = runQuery(`SELECT password_hash FROM tables.players WHERE "${body.player}" == email`);
+			const db_hash = runQuery(`SELECT password_hash FROM tables.players WHERE "${body.player}" = email`);
 			if (body.confirmation === db_hash){
-				const hash = cyrb53(body.password);
-				runQuery(`UPDATE tables.players SET password_hash = ${hash}, token = ${newToken} WHERE "${body.player}" == email`);
+				const hash = cyrb53(body.password).toString();
+				runQuery(`UPDATE tables.players SET password_hash = "${hash}", token = "${newToken}" WHERE "${body.player}" = email`);
 				res.send(newToken);
 			}
 			break;
@@ -130,3 +131,10 @@ ${updated_response}`);
 			throw `Action type ${body.type} not permitted`;
 	}
 }
+
+/*
+ * Tested:
+ *
+ * new user
+ * 
+ */ 

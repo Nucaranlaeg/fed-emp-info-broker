@@ -11,7 +11,7 @@ let messages = [
 
 let currentGame = {name: "OKtC", opponent: "mcalhoon2@sbcglobal.net"};
 
-const url = "";
+const url = "https://us-central1-fed-emp-info-broker.cloudfunctions.net/backend";
 
 function loadAllGames(games){
 	const gamesNode = document.querySelector("#games");
@@ -132,4 +132,19 @@ function getGames() {
 	};
 	xml.open("POST", url, true);
 	xml.send({type: "get messages", game: currentGame});
+}
+
+function login(){
+	const xml = new XMLHttpRequest();
+	xml.onreadystatechange = () => {
+        if (xmlHttp.readyState == 4 && xmlHttp.status == 200){
+			loadMessages(JSON.parse(xml.response));
+		}
+	};
+	xml.open("POST", url, true);
+	xml.send({
+		type: "login",
+		email: document.querySelector("#email").value,
+		password: document.querySelector("#password").value,
+	});
 }
