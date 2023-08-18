@@ -65,15 +65,38 @@ function loadGame(game){
 }
 
 function updateMessage(message, node){
-	throw "NOT IMPLEMENTED";
+	const data = {
+		id: message.id,
+		data: message.data,
+	}
+	const xml = new XMLHttpRequest();
+	xml.onreadystatechange = () => {
+		getMessages();
+	};
+	xml.open("POST", url, true);
+	data.type = "update message";
+	xml.send(data);
 }
 
 function replyMessage(message, node){
-	throw "NOT IMPLEMENTED";
+	const data = {
+		id: message.id,
+		data: message.data,
+		to: message.to,
+		response: message.response,
+	}
+	const xml = new XMLHttpRequest();
+	xml.onreadystatechange = () => {
+		getMessages();
+	};
+	xml.open("POST", url, true);
+	data.type = "reply message";
+	data.game = currentGame;
+	xml.send(data);
 }
 
 function sendMessage(){
-	const message = {
+	const data = {
 		subject: document.querySelector("#new-subject").value,
 		to: currentGame.opponent,
 		data: document.querySelector("#new-data").value,
